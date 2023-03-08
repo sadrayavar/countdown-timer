@@ -3,17 +3,17 @@ const dummyData = {
 		{
 			name: "Mom's birthday",
 			date: 1678294104178,
-			repeat: "yearly",
+			type: "yearly",
 		},
 		{
 			name: "Toothbrush",
 			date: 1673294404178,
-			repeat: "daily",
+			type: "daily",
 		},
 		{
 			name: "deliver package",
 			date: 1678294101178,
-			repeat: "once",
+			type: "once",
 		},
 	],
 }
