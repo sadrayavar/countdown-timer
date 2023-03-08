@@ -21,7 +21,7 @@ class Main {
 			this.db.newDatabase()
 
 			// authenticate
-			this.auth.auth()
+			this.auth.auth(this.db.database)
 
 			// get and save data on database
 			this.db.database.events = this.api.getData()
@@ -34,5 +34,4 @@ class Main {
 		this.ui.mapTo(data)
 	}
 }
-const main = new Main()
-export default main
+export default new Main()

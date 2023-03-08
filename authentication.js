@@ -1,5 +1,5 @@
 export default class Authentication {
-    isAuth(lastLog) {
+	isAuth(lastLog) {
 		const isNumber = !isNaN(lastLog)
 		if (isNumber) {
 			const now = new Date().getTime()
@@ -13,8 +13,9 @@ export default class Authentication {
 			return false
 		}
 	}
-	auth() {
+	auth(db) {
 		const now = new Date().getTime()
-		localStorage.setItem("countdownTimerDatabase", this.database)
+		db.lastLog = now
+		localStorage.setItem("countdownTimerDatabase", JSON.stringify(db))
 	}
 }

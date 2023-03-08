@@ -5,6 +5,6 @@ export default class Database {
 
 	newDatabase() {
 		this.database = { lastLog: undefined, events: [] }
-		localStorage.setItem("countdownTimerDatabase", this.database)
+		localStorage.setItem("countdownTimerDatabase", JSON.stringify(this.database))
 	}
 }
