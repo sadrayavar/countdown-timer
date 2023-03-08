@@ -3,9 +3,6 @@ import Database from "./database.js"
 import Api from "./api.js"
 import Ui from "./ui.js"
 
-// constant values
-const sessionLife = 600000
-
 class Main {
 	auth = new Authentication()
 	db = new Database()

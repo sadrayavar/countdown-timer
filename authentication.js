@@ -1,10 +1,9 @@
 export default class Authentication {
 	isAuth(lastLog) {
-		const isNumber = !isNaN(lastLog)
-		if (isNumber) {
+		if (typeof lastLog === "number") {
 			const now = new Date().getTime()
 
-			if (now - lastLog < sessionLife) {
+			if (now - lastLog < 600000) {
 				return false
 			} else {
 				return true
