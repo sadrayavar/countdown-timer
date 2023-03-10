@@ -1,16 +1,21 @@
 export default class Database {
-	database = undefined
+	databaseKey = "countdown_timer_database"
 
-	constructor() {
-		let temp = JSON.parse(localStorage.getItem("countdownTimerDatabase"))
-
-		if (temp == null) temp = { lastLog: null }
-
-		this.database = temp
+	write(data, property = undefined) {
+		if (property == undefined) localStorage.setItem(this.databaseKey, btoa(JSON.stringify(data)))
+		else {
+			const database = this.read()
+			database[property] = data
+			this.write(database)
+		}
 	}
 
-	newDatabase() {
-		this.database = { lastLog: undefined, events: [] }
-		localStorage.setItem("countdownTimerDatabase", JSON.stringify(this.database))
+	read(property = undefined) {
+		const data = localStorage.getItem(this.databaseKey)
+
+		if (data === null) return null
+
+		if (property === undefined) return JSON.parse(atob(data))
+		else return JSON.parse(atob(data))[property]
 	}
 }

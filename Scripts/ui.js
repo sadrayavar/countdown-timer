@@ -7,7 +7,7 @@ export default class Ui {
 			this.elems.container.append(temp)
 		})
 	}
-	renderEvent(name, date, type) {
+	async renderEvent(name, date, type) {
 		const container = document.createElement("div")
 		container.id = name
 		;[name, date, type].forEach((data) => {
@@ -18,12 +18,10 @@ export default class Ui {
 		;["edit", "remove"].forEach((entry) => {
 			const element = document.createElement("button")
 			element.innerHTML = entry
+			const { main } = await import("./main.js")
 
-			if (entry == "edit") {
-				element.onclick = this.editEntry
-			} else {
-				element.onclick = this.removeEntry
-			}
+			if (entry == "edit") element.onclick = main.editEvent
+			else element.onclick = main.removeEvent
 
 			container.append(element)
 		})
@@ -31,15 +29,5 @@ export default class Ui {
 		container.append(document.createElement("br"))
 
 		return container
-	}
-	editEntry(event) {
-		const id = event.target.parentNode.id
-
-		alert(`${id} removed`)
-	}
-	removeEntry(event) {
-		const id = event.target.parentNode.id
-
-		alert(`${id} removed`)
 	}
 }

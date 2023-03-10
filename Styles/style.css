@@ -67,6 +67,17 @@ main figure {
     border-radius: 20px;
 }
 
+/*###################################################### profile styles*/
+#profile {
+    position: absolute;
+    right: 15px;
+    top: 15px;
+}
+
+#profile * {
+    color: #221f1f;
+}
+
 /*###################################################### aside styles*/
 
 main aside>* {}
