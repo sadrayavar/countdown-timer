@@ -1,7 +1,7 @@
 export default class BackEnd {
-	databaseKey = "fake_back_end_database"
+	#databaseKey = "fake_back_end_database"
 	tokenLife = 1000 * 60 * 2
-	initialData = {
+	#initialData = {
 		users: [
 			{
 				username: "sadra",
@@ -34,15 +34,17 @@ export default class BackEnd {
 		],
 	}
 	constructor() {
-		if (this.#read() === null) this.#write(this.initialData)
+		if (this.#read() === null) this.#write(this.#initialData)
 	}
-	tempForLog = () => this.#read()
+	tempForLog() {
+		return this.#read()
+	}
 	#read = () => {
-		const data = localStorage.getItem(this.databaseKey)
+		const data = localStorage.getItem(this.#databaseKey)
 		if (data === null) return null
 		else return JSON.parse(atob(data))
 	}
-	#write = (data) => localStorage.setItem(this.databaseKey, btoa(JSON.stringify(data)))
+	#write = (data) => localStorage.setItem(this.#databaseKey, btoa(JSON.stringify(data)))
 	#response = (isOk, body = undefined, error = undefined) => {
 		if (isOk)
 			return {
@@ -90,10 +92,12 @@ export default class BackEnd {
 		}
 		return -1
 	}
-	auth(db) {
-		const now = new Date().getTime()
-		db.lastLog = now
-		localStorage.setItem("countdownTimerDatabase", JSON.stringify(db))
+	#validateToken(token) {
+		const users = this.#read().users
+
+		for (let i = 0; i < users.length; i++) if (users[i].token == token) return i
+
+		return -1
 	}
 
 	signup(username, password) {
@@ -104,7 +108,7 @@ export default class BackEnd {
 			database.users.push({
 				username,
 				password: password.toString(),
-				events: [],
+				data: {},
 			})
 			this.#write(database)
 
@@ -150,5 +154,11 @@ export default class BackEnd {
 		})
 		return returnValue
 	}
-	getData() {}
+	getData(token) {
+		const userPlace = this.#validateToken(token)
+		if (userPlace > -1) {
+			const data = this.#read().users[userPlace].data.events
+			return this.#response(true, { data })
+		} else return this.#response(false, { error: "token is invalid" })
+	}
 }

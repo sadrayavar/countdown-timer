@@ -31,10 +31,8 @@ export default class Main {
 		// check if its authenticated
 		const lastLog = this.db.read("lastLog")
 		const alive = leftTime(lastLog) > this.api.tokenLife / 10
-		if (alive) {
-			// start to refresh after n seconds
-			setTimeout(() => this.refresh(), leftTime(lastLog))
-		} else {
+		if (alive) this.refresh(this.db.read("refreshToken"))
+		else {
 			// clean browser storage
 			localStorage.removeItem(this.db.databaseKey)
 			// create new database
@@ -84,6 +82,9 @@ export default class Main {
 
 			// start to refresh the token
 			this.refresh(token, refreshToken)
+
+			// get data from back after login
+			this.getData(this.db.read("token"))
 		} else {
 			alert(res.error)
 			this.log()
@@ -108,6 +109,15 @@ export default class Main {
 		}, this.api.tokenLife * 0.9)
 
 		this.log()
+	}
+	getData(token) {
+		const res = this.api.getData(this.db.read("token"))
+
+		if (res.isOk) {
+			const events = JSON.parse(res.body).data
+
+			this.db.write(events, "events")
+		}
 	}
 }
 export const main = new Main()

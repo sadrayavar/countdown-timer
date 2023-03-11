@@ -1,15 +1,15 @@
-import { main } from "./main.js"
-
 export default class Ui {
 	elems = { container: document.getElementById("dataContainer") }
 
 	mapTo(eventList) {
-		eventList.forEach((event) => {
-			const temp = this.renderEvent(event.name, event.date, event.type)
+		eventList.forEach(async (event) => {
+			const temp = await this.#renderEvent(event.name, event.date, event.type)
 			this.elems.container.append(temp)
 		})
 	}
-	renderEvent(name, date, type) {
+	async #renderEvent(name, date, type) {
+		const { main } = await import("./main.js")
+
 		const container = document.createElement("div")
 		container.id = name
 		;[name, date, type].forEach((data) => {
