@@ -7,16 +7,16 @@ export default class Main {
 	ui = new Ui()
 	api = new FakeBackEnd()
 
+	constructor() {
+		// add button event listeners
+		;["signup", "login", "log"].forEach((key) => (document.getElementById(key).onclick = this.#eventListener))
+
+		this.#firstLoad()
+	}
 	async log() {
 		const { main } = await import("./main.js")
 
 		console.log("front database:\n", main.db.read(), "\n", "back database:\n", main.api.tempForLog().users)
-	}
-	constructor() {
-		// add button event listeners
-		;["signup", "login", "log"].forEach((key) => (document.getElementById(key).onclick = this[key]))
-
-		this.#firstLoad()
 	}
 	#firstLoad() {
 		function leftTime(lastLog) {
@@ -45,72 +45,68 @@ export default class Main {
 		// map data to ui
 		this.ui.mapTo(data)
 	}
-	#updateSession(res) {
-		// save tokens
-		const { token, refreshToken } = JSON.parse(res.body)
-		main.db.write(token, "token")
-		main.db.write(refreshToken, "refreshToken")
-
-		// save last log
-		main.db.write(new Date().getTime(), "lastLog")
-		main.db.write(true, "alive")
+	async #eventListener(event) {
+		const target = event.target
+		const { main } = await import("./main.js")
+		main[target.getAttribute("evetListener")](target)
 	}
-	async signup(event) {
+	signup(target) {
 		// get username and password that are in input field
-		let { username, password } = event.target.parentElement.children
+		let { username, password } = target.parentElement.children
 		username = username.value
 		password = password.value
 
-		// import backend api and database
-		const { main } = await import("./main.js")
+		const res = this.api.signup(username, password)
 
-		const res = main.api.signup(username, password)
-
-		if (res.isOk) {
-			// save username and password
-			const { username, password } = JSON.parse(res.body)
-			main.db.write(username, "username")
-
-			// login
-			const logRes = main.api.login(username, password)
-			if (logRes.isOk) main.#updateSession(res)
-			else alert(logRes.error)
-		} else alert(res.error)
-
-		main.log()
+		if (res.isOk) this.login(target, JSON.parse(res.body))
+		else {
+			alert(res.error)
+			this.log()
+		}
 	}
-	async login(event) {
+	login(target, credentials = undefined) {
 		// get username and password that are in input field
-		let { username, password } = event.target.parentElement.children
+		let { username, password } = target.parentElement.children
 		username = username.value
 		password = password.value
 
-		// import backend api and database
-		const { main } = await import("./main.js")
+		if (credentials != undefined) {
+			username = credentials.username
+			password = credentials.password
+		}
 
-		const res = main.api.login(username, password)
+		const res = this.api.login(username, password)
 
 		if (res.isOk) {
-			main.#updateSession(res)
+			// save username
+			const { username, token, refreshToken } = JSON.parse(res.body)
+			this.db.write(username, "username")
 
 			// start to refresh the token
-			setTimeout(() => main.refresh(), main.api.tokenLife * 0.9)
-		} else alert(res.error)
-
-		main.log()
+			this.refresh(token, refreshToken)
+		} else {
+			alert(res.error)
+			this.log()
+		}
 	}
-	async refresh(event) {
-		// import backend api and database
-		const { main } = await import("./main.js")
+	refresh(token, refreshToken) {
+		// save tokens
+		this.db.write(token, "token")
+		this.db.write(refreshToken, "refreshToken")
 
-		const res = main.api.refresh(main.db.read("refreshToken"))
+		// save last log
+		this.db.write(new Date().getTime(), "lastLog")
+		this.db.write(true, "alive")
 
-		if (res.isOk) {
-			main.#updateSession(res)
-			setTimeout(() => main.refresh(), this.api.tokenLife * 0.9)
-		} else alert(res.error)
+		setTimeout(() => {
+			const res = this.api.refresh(this.db.read("refreshToken"))
+			const { token, refreshToken } = JSON.parse(res.body)
 
-		main.log()
+			if (res.isOk) this.refresh(token, refreshToken)
+			else alert(res.error)
+		}, this.api.tokenLife * 0.9)
+
+		this.log()
 	}
 }
 export const main = new Main()

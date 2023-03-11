@@ -6,8 +6,6 @@ export default class BackEnd {
 			{
 				username: "sadra",
 				password: "123",
-				token: null,
-				refreshToken: null,
 				data: {
 					events: [
 						{
@@ -31,8 +29,6 @@ export default class BackEnd {
 			{
 				username: "ali",
 				password: "456",
-				token: null,
-				refreshToken: null,
 				data: {},
 			},
 		],
@@ -66,10 +62,10 @@ export default class BackEnd {
 		const refreshToken = `${username}.${password}.${pin}`
 
 		const database = this.#read()
-		database.users.forEach((username) => {
-			if (username.username === username) {
-				username.token = token
-				username.refreshToken = refreshToken
+		database.users.forEach((user) => {
+			if (user.username === username) {
+				user.token = token
+				user.refreshToken = refreshToken
 			}
 		})
 
@@ -86,10 +82,12 @@ export default class BackEnd {
 			if (!existence) userPlace++
 		})
 
-		// check username and password
-		if (existence && users[userPlace].password === password) return true
-		// check username
-		else return existence
+		if (password == undefined) {
+			if (existence) return userPlace
+		} else {
+			if (users[userPlace].password === password) return userPlace
+		}
+		return -1
 	}
 	auth(db) {
 		const now = new Date().getTime()
@@ -98,7 +96,8 @@ export default class BackEnd {
 	}
 
 	signup(username, password) {
-		if (this.#checkUser(username)) return this.#response(false, "", "you cant sign up because username already exist")
+		if (this.#checkUser(username) > -1)
+			return this.#response(false, "", "you cant sign up because username already exist")
 		else {
 			const database = this.#read()
 			database.users.push({
@@ -112,11 +111,15 @@ export default class BackEnd {
 		}
 	}
 	login(username, password) {
-		const existence = this.#checkUser(username, password)
-		if (existence) {
+		const userPlace = this.#checkUser(username, password)
+		if (userPlace > -1) {
 			const [token, refreshToken] = this.#generateToken(username, password)
 
-			return this.#response(true, { token, refreshToken })
+			const data = this.#read()
+			data.users[userPlace] = { ...data.users[userPlace], token, refreshToken }
+			this.#write(data)
+
+			return this.#response(true, { username, token, refreshToken })
 		} else return this.#response(false, "", "you cant log in because username " + username + " doesnt exist")
 	}
 	refresh(refreshToken) {

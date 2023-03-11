@@ -1,3 +1,5 @@
+import { main } from "./main"
+
 export default class Ui {
 	elems = { container: document.getElementById("dataContainer") }
 
@@ -7,7 +9,7 @@ export default class Ui {
 			this.elems.container.append(temp)
 		})
 	}
-	async renderEvent(name, date, type) {
+	renderEvent(name, date, type) {
 		const container = document.createElement("div")
 		container.id = name
 		;[name, date, type].forEach((data) => {
@@ -18,7 +20,6 @@ export default class Ui {
 		;["edit", "remove"].forEach((entry) => {
 			const element = document.createElement("button")
 			element.innerHTML = entry
-			const { main } = await import("./main.js")
 
 			if (entry == "edit") element.onclick = main.editEvent
 			else element.onclick = main.removeEvent
