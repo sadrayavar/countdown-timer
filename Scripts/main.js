@@ -100,10 +100,11 @@ export default class Main {
 
 		setTimeout(() => {
 			const res = this.api.refresh(this.db.read("refreshToken"))
-			const { token, refreshToken } = JSON.parse(res.body)
 
-			if (res.isOk) this.refresh(token, refreshToken)
-			else alert(res.error)
+			if (res.isOk) {
+				const { token, refreshToken } = JSON.parse(res.body)
+				this.refresh(token, refreshToken)
+			} else alert(res.error)
 		}, this.api.tokenLife * 0.9)
 
 		this.log()

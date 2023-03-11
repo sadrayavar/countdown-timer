@@ -1,6 +1,6 @@
 export default class BackEnd {
 	databaseKey = "fake_back_end_database"
-	tokenLife = 1000 * 60 * 3
+	tokenLife = 1000 * 60 * 2
 	initialData = {
 		users: [
 			{
@@ -36,6 +36,7 @@ export default class BackEnd {
 	constructor() {
 		if (this.#read() === null) this.#write(this.initialData)
 	}
+	tempForLog = () => this.#read()
 	#read = () => {
 		const data = localStorage.getItem(this.databaseKey)
 		if (data === null) return null
@@ -123,7 +124,10 @@ export default class BackEnd {
 		} else return this.#response(false, "", "you cant log in because username " + username + " doesnt exist")
 	}
 	refresh(refreshToken) {
-		this.#read().users.forEach((user) => {
+		let returnValue = this.#response(false, "", "token is unvallid")
+
+		const data = this.#read()
+		data.users.forEach((user) => {
 			if (user.refreshToken === refreshToken) {
 				const now = new Date().getTime()
 				const tokenBirth = Number(atob(user.token.split(".")[2]))
@@ -135,15 +139,16 @@ export default class BackEnd {
 					user.refreshToken = refreshToken
 					this.#write(data)
 
-					return this.#response(true, { token, refreshToken })
+					returnValue = this.#response(true, { token, refreshToken })
 				} else {
 					delete user.token
 					delete user.refreshToken
 					this.#write(data)
-					return this.#response(false, "", "token is dead")
+					returnValue = this.#response(false, "", "token is dead")
 				}
-			} else return this.#response(false, "", "token is unvallid")
+			}
 		})
+		return returnValue
 	}
-	tempForLog = () => this.#read()
+	getData() {}
 }
