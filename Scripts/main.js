@@ -89,6 +89,13 @@ export default class Main {
 			this.log()
 		}
 	}
+	logout() {
+		// delete database
+		this.db.write({ lastLog: null }, undefined)
+
+		// refresh page
+		location.reload()
+	}
 	refresh(token, refreshToken) {
 		// save tokens
 		this.db.write(token, "token")

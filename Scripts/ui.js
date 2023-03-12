@@ -2,7 +2,7 @@ export default class Ui {
 	elements = { eventContainer: document.getElementById("dataContainer") }
 
 	constructor() {
-		;["login", "signup", "log", "addEvent"].forEach(
+		;["login", "signup", "log", "addEvent", "logout"].forEach(
 			(key) => (document.getElementById(key).onclick = this.#eventListener)
 		)
 	}
