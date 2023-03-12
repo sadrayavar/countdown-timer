@@ -88,7 +88,7 @@ export default class BackEnd {
 		if (password == undefined) {
 			if (existence) return userPlace
 		} else {
-			if (users[userPlace].password === password) return userPlace
+			if (existence && users[userPlace].password === password) return userPlace
 		}
 		return -1
 	}
@@ -125,7 +125,7 @@ export default class BackEnd {
 			this.#write(data)
 
 			return this.#response(true, { username, token, refreshToken })
-		} else return this.#response(false, "", "you cant log in because username " + username + " doesnt exist")
+		} else return this.#response(false, "", "you cant log in - given credentials are not correct")
 	}
 	refresh(refreshToken) {
 		let returnValue = this.#response(false, "", "token is unvallid")
@@ -158,6 +158,15 @@ export default class BackEnd {
 		const userPlace = this.#validateToken(token)
 		if (userPlace > -1) {
 			const data = this.#read().users[userPlace].data.events
+			return this.#response(true, { data })
+		} else return this.#response(false, { error: "token is invalid" })
+	}
+	setData(token, newData) {
+		const userPlace = this.#validateToken(token)
+		if (userPlace > -1) {
+			const data = this.#read()
+			data.users[userPlace].data.events = newData
+			this.#write(data)
 			return this.#response(true, { data })
 		} else return this.#response(false, { error: "token is invalid" })
 	}

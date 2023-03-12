@@ -11,15 +11,16 @@
 		<div id="profile">
 			<input id="username" placeholder="username" />
 			<input id="password" placeholder="password" />
-			<button evetListener="signup" id="signup" type="button">Signup</button>
-			<button evetListener="login" id="login" type="button">Login</button>
-			<button evetListener="log" id="log" type="button">display database</button>
+			<button eventListener="signup" id="signup" type="button">Signup</button>
+			<button eventListener="login" id="login" type="button">Login</button>
+			<button eventListener="log" id="log" type="button">display database</button>
 		</div>
 
 		<main class="flexbox">
 			<aside>
 				<nav>
-					<input placeholder="Click to search or add" />
+					<input id="navInput" placeholder="Click to search or add" />
+					<button eventListener="addEvent" id="addEvent" type="button">add event</button>
 				</nav>
 
 				<ul id="dataContainer"></ul>
@@ -30,4 +31,3 @@
 		<script type="module" src="./Scripts/main.js"></script>
 	</body>
 </html>
-    

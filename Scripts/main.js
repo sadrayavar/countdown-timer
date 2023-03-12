@@ -8,15 +8,13 @@ export default class Main {
 	api = new FakeBackEnd()
 
 	constructor() {
-		// add button event listeners
-		;["signup", "login", "log"].forEach((key) => (document.getElementById(key).onclick = this.#eventListener))
-
 		this.#firstLoad()
+		this.log()
 	}
 	async log() {
-		const { main } = await import("./main.js")
+		// const { main } = await import("./main.js")
 
-		console.log("front database:\n", main.db.read(), "\n", "back database:\n", main.api.tempForLog().users)
+		console.log("front database:\n", this.db.read(), "\n", "back database:\n", this.api.tempForLog().users)
 	}
 	#firstLoad() {
 		function leftTime(lastLog) {
@@ -41,12 +39,7 @@ export default class Main {
 		// load data from database
 		const data = this.db.read("events")
 		// map data to ui
-		this.ui.mapTo(data)
-	}
-	async #eventListener(event) {
-		const target = event.target
-		const { main } = await import("./main.js")
-		main[target.getAttribute("evetListener")](target)
+		this.ui.mapEvents(data, this.ui.elements.eventContainer)
 	}
 	signup(target) {
 		// get username and password that are in input field
@@ -85,6 +78,12 @@ export default class Main {
 
 			// get data from back after login
 			this.getData(this.db.read("token"))
+
+			// map data to ui
+			const data = this.db.read("events")
+			const eventContainer = this.ui.elements.eventContainer
+			eventContainer.innerHTML = ""
+			this.ui.mapEvents(data, eventContainer)
 		} else {
 			alert(res.error)
 			this.log()
@@ -114,10 +113,51 @@ export default class Main {
 		const res = this.api.getData(this.db.read("token"))
 
 		if (res.isOk) {
-			const events = JSON.parse(res.body).data
+			let events = JSON.parse(res.body).data
+			if (events == undefined) events = []
 
 			this.db.write(events, "events")
 		}
+	}
+	addEvent(target) {
+		// define event object
+		const eventObject = { name: "", date: "", type: "" }
+
+		// get event info from ui
+		eventObject.name = target.parentElement.children[0].value
+
+		// check for existence
+		const events = this.db.read("events")
+		for (let i = 0; i < events.length; i++)
+			if (events[i].name === eventObject.name) return alert("this event already exists")
+
+		// add event to database
+		events.push(eventObject)
+		this.db.write(events, "events")
+
+		// add event to ui
+		this.ui.mapEvents([eventObject], this.ui.elements.eventContainer)
+
+		// send data to backend
+		this.api.setData(this.db.read("token"), this.db.read("events"))
+	}
+	removeEvent(target) {
+		const parent = target.parentElement
+
+		// remove element from database
+		const events = this.db.read("events")
+		for (let i = 0; i < events.length; i++) if (events[i].name === parent.children[0].innerHTML) events.splice(i, 1)
+		this.db.write(events, "events")
+
+		// remove element from ui
+		target.parentElement.remove()
+
+		// send remove signal to backend
+		this.api.setData(this.db.read("token"), this.db.read("events"))
+	}
+	editEvent(target) {
+		const id = target.parentElement.id
+		console.log(id)
 	}
 }
 export const main = new Main()
