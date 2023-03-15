@@ -1,6 +1,6 @@
 export default class BackEnd {
 	#databaseKey = "fake_back_end_database"
-	tokenLife = 1000 * 60 * 2
+	tokenLife = 1000 * 60 * 0.25
 	#initialData = {
 		users: [
 			{
@@ -118,48 +118,73 @@ export default class BackEnd {
 	login(username, password) {
 		const userPlace = this.#checkUser(username, password)
 		if (userPlace > -1) {
+			//create token
 			const [token, refreshToken] = this.#generateToken(username, password)
 
+			// save token
 			const data = this.#read()
 			data.users[userPlace] = { ...data.users[userPlace], token, refreshToken }
 			this.#write(data)
 
+			// delete token after specified time
+			setTimeout(() => {
+				const data = this.#read()
+
+				if (data.users[userPlace].token === token) {
+					delete data.users[userPlace].token
+					delete data.users[userPlace].refreshToken
+					this.#write(data)
+				}
+			}, this.tokenLife)
+
+			// return response
 			return this.#response(true, { username, token, refreshToken })
 		} else return this.#response(false, "", "you cant log in - given credentials are not correct")
 	}
 	refresh(refreshToken) {
-		let returnValue = this.#response(false, "", "token is unvallid")
-
 		const data = this.#read()
-		data.users.forEach((user) => {
-			if (user.refreshToken === refreshToken) {
-				const now = new Date().getTime()
-				const tokenBirth = Number(atob(user.token.split(".")[2]))
+		for (let i = 0; i < data.users.length; i++) {
+			// check next user if token is not the same
+			if (data.users[i].refreshToken !== refreshToken) continue
 
-				if (now - tokenBirth < this.tokenLife) {
-					let [token, refreshToken] = this.#generateToken(user.username, user.password)
+			// check token life
+			const now = new Date().getTime()
+			const tokenBirth = Number(atob(data.users[i].token.split(".")[2]))
+			if (now - tokenBirth < this.tokenLife) {
+				// create token
+				let [token, refreshToken] = this.#generateToken(data.users[i].username, data.users[i].password)
 
-					user.token = token
-					user.refreshToken = refreshToken
-					this.#write(data)
+				// save token
+				data.users[i] = { ...data.users[i], token, refreshToken }
+				this.#write(data)
 
-					returnValue = this.#response(true, { token, refreshToken })
-				} else {
-					delete user.token
-					delete user.refreshToken
-					this.#write(data)
-					returnValue = this.#response(false, "", "token is dead")
-				}
+				// delete token after specified time
+				setTimeout(() => {
+					const data = this.#read()
+
+					if (data.users[i].token === token) {
+						delete data.users[i].token
+						delete data.users[i].refreshToken
+						this.#write(data)
+					}
+				}, this.tokenLife)
+
+				//return response
+				return this.#response(true, { token, refreshToken })
+			} else {
+				data.users[i] = { ...data.users[i], token: null, refreshToken: null }
+				this.#write(data)
+				return this.#response(false, "", "token is dead")
 			}
-		})
-		return returnValue
+		}
+		return this.#response(false, "", "token is unvalid")
 	}
 	getData(token) {
 		const userPlace = this.#validateToken(token)
 		if (userPlace > -1) {
 			const data = this.#read().users[userPlace].data.events
 			return this.#response(true, { data })
-		} else return this.#response(false, { error: "token is invalid" })
+		} else return this.#response(false, "", "token is invalid")
 	}
 	setData(token, newData) {
 		const userPlace = this.#validateToken(token)
@@ -168,6 +193,6 @@ export default class BackEnd {
 			data.users[userPlace].data.events = newData
 			this.#write(data)
 			return this.#response(true, { data })
-		} else return this.#response(false, { error: "token is invalid" })
+		} else return this.#response(false, "", "token is invalid")
 	}
 }

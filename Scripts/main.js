@@ -9,7 +9,6 @@ export default class Main {
 
 	constructor() {
 		this.#firstLoad()
-		this.log()
 	}
 	async log() {
 		// const { main } = await import("./main.js")
@@ -50,10 +49,7 @@ export default class Main {
 		const res = this.api.signup(username, password)
 
 		if (res.isOk) this.login(target, JSON.parse(res.body))
-		else {
-			alert(res.error)
-			this.log()
-		}
+		else alert(res.error)
 	}
 	login(target, credentials = undefined) {
 		// get username and password that are in input field
@@ -84,10 +80,7 @@ export default class Main {
 			const eventContainer = this.ui.elements.eventContainer
 			eventContainer.innerHTML = ""
 			this.ui.mapEvents(data, eventContainer)
-		} else {
-			alert(res.error)
-			this.log()
-		}
+		} else alert(res.error)
 	}
 	logout() {
 		// delete database
@@ -113,8 +106,6 @@ export default class Main {
 				this.refresh(token, refreshToken)
 			} else alert(res.error)
 		}, this.api.tokenLife * 0.9)
-
-		this.log()
 	}
 	getData(token) {
 		const res = this.api.getData(this.db.read("token"))
