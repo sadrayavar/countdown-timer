@@ -1,45 +1,42 @@
 import FakeBackEnd from "./fakeBackEnd.js"
-import Database from "./database.js"
 import Ui from "./ui.js"
 
 export default class Main {
-	db = new Database()
 	ui = new Ui()
 	api = new FakeBackEnd()
+	timeEdge = 1000 * 5
 
 	constructor() {
-		this.#firstLoad()
-	}
-	async log() {
-		// const { main } = await import("./main.js")
+		let data = []
 
-		console.log("front database:\n", this.db.read(), "\n", "back database:\n", this.api.tempForLog().users)
-	}
-	#firstLoad() {
-		function leftTime(lastLog) {
-			if (lastLog === null) return 0
-			else {
-				const now = new Date().getTime()
+		if (this.#alive()) {
+			// start to refresh the token
+			this.refresh(localStorage.getItem("token"), localStorage.getItem("refreshToken"))
 
-				return now - lastLog
-			}
+			// load data from backend
+			data = this.getData(localStorage.getItem("token"))
+		} else {
+			const temp = localStorage.getItem(this.api.databaseKey)
+			localStorage.clear()
+			localStorage.setItem("lastLog", null)
+			localStorage.setItem(this.api.databaseKey, temp)
 		}
 
-		// check if its authenticated
-		const lastLog = this.db.read("lastLog")
-		const alive = leftTime(lastLog) > this.api.tokenLife / 10
-		if (alive) this.refresh(this.db.read("refreshToken"))
-		else {
-			// clean browser storage
-			localStorage.removeItem(this.db.databaseKey)
-			// create new database
-			this.db.write({ lastLog: null, alive: false, events: [] })
-		}
-		// load data from database
-		const data = this.db.read("events")
 		// map data to ui
 		this.ui.mapEvents(data, this.ui.elements.eventContainer)
 	}
+
+	#alive() {
+		// check if its authenticated
+		const lastLog = Number(localStorage.getItem("lastLog"))
+
+		if (isNaN(lastLog)) return false
+
+		const now = new Date().getTime()
+		const pastTime = now - lastLog
+		return pastTime < this.api.tokenLife - this.timeEdge
+	}
+
 	signup(target) {
 		// get username and password that are in input field
 		let { username, password } = target.parentElement.children
@@ -67,16 +64,15 @@ export default class Main {
 		if (res.isOk) {
 			// save username
 			const { username, token, refreshToken } = JSON.parse(res.body)
-			this.db.write(username, "username")
+			localStorage.setItem("username", username)
 
 			// start to refresh the token
 			this.refresh(token, refreshToken)
 
 			// get data from back after login
-			this.getData(this.db.read("token"))
+			const data = this.getData(localStorage.getItem("token"))
 
 			// map data to ui
-			const data = this.db.read("events")
 			const eventContainer = this.ui.elements.eventContainer
 			eventContainer.innerHTML = ""
 			this.ui.mapEvents(data, eventContainer)
@@ -84,78 +80,90 @@ export default class Main {
 	}
 	logout() {
 		// delete database
-		this.db.write({ lastLog: null }, undefined)
+		localStorage.setItem("lastLog", null)
 
 		// refresh page
 		location.reload()
 	}
 	refresh(token, refreshToken) {
 		// save tokens
-		this.db.write(token, "token")
-		this.db.write(refreshToken, "refreshToken")
+		localStorage.setItem("token", token)
+		localStorage.setItem("refreshToken", refreshToken)
 
 		// save last log
-		this.db.write(new Date().getTime(), "lastLog")
-		this.db.write(true, "alive")
+		localStorage.setItem("lastLog", new Date().getTime())
 
 		setTimeout(() => {
-			const res = this.api.refresh(this.db.read("refreshToken"))
+			const res = this.api.refresh(localStorage.getItem("refreshToken"))
 
 			if (res.isOk) {
 				const { token, refreshToken } = JSON.parse(res.body)
 				this.refresh(token, refreshToken)
 			} else alert(res.error)
-		}, this.api.tokenLife * 0.9)
+		}, this.api.tokenLife - this.timeEdge)
 	}
+
 	getData(token) {
-		const res = this.api.getData(this.db.read("token"))
+		const res = this.api.getData(token)
 
-		if (res.isOk) {
-			let events = JSON.parse(res.body).data
-			if (events == undefined) events = []
-
-			this.db.write(events, "events")
+		if (res.isOk) return JSON.parse(res.body).data
+		else {
+			alert(res.error)
+			return []
 		}
 	}
 	addEvent(target) {
-		// define event object
+		// define event object and get info from ui
 		const eventObject = { name: "", date: "", type: "" }
-
-		// get event info from ui
-		eventObject.name = target.parentElement.children[0].value
-
-		// check for existence
-		const events = this.db.read("events")
-		for (let i = 0; i < events.length; i++)
-			if (events[i].name === eventObject.name) return alert("this event already exists")
-
-		// add event to database
-		events.push(eventObject)
-		this.db.write(events, "events")
-
-		// add event to ui
-		this.ui.mapEvents([eventObject], this.ui.elements.eventContainer)
+		eventObject.name = target.parentElement.children[0].value.trim()
 
 		// send data to backend
-		this.api.setData(this.db.read("token"), this.db.read("events"))
+		const res = this.api.setData(localStorage.getItem("token"), eventObject)
+
+		if (res.isOk) {
+			const data = JSON.parse(res.body).newData
+
+			// add event to ui
+			this.ui.mapEvents([data], this.ui.elements.eventContainer)
+		} else return alert(res.error)
 	}
 	removeEvent(target) {
 		const parent = target.parentElement
 
-		// remove element from database
-		const events = this.db.read("events")
-		for (let i = 0; i < events.length; i++) if (events[i].name === parent.children[0].innerHTML) events.splice(i, 1)
-		this.db.write(events, "events")
+		if (this.#alive()) {
+			// send delete request to backend
+			const name = parent.children[0].innerHTML
+			const res = this.api.removeData(localStorage.getItem("token"), name)
+
+			if (!res.isOk) return alert(res.error)
+		}
 
 		// remove element from ui
-		target.parentElement.remove()
-
-		// send remove signal to backend
-		this.api.setData(this.db.read("token"), this.db.read("events"))
+		parent.style.opacity = "0"
+		setTimeout(() => parent.remove(), 600)
 	}
 	editEvent(target) {
 		const id = target.parentElement.id
 		console.log(id)
+	}
+
+	addEventTest() {
+		const container = document.createElement("div")
+		container.style.cssText = "display:flex;flex-direction:column;justify-content:center"
+
+		const keys = ["name", "date", "type"]
+		keys.forEach((key) => {
+			const input = document.createElement("input")
+			// input.id = key
+
+			const label = document.createElement("label")
+			label.setAttribute("for", key)
+
+			container.appendChild(label)
+			container.appendChild(input)
+		})
+
+		this.ui.openModal(container)
 	}
 }
 export const main = new Main()

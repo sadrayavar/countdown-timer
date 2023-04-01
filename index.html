@@ -4,31 +4,41 @@
 		<meta charset="UTF-8" />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<link rel="stylesheet" href="./Styles/style.css" />
+		<link rel="stylesheet" href="./style.css" />
 		<title>Countdown Timer</title>
 	</head>
+
 	<body>
-		<div id="profile">
-			<input id="username" placeholder="username" />
-			<input id="password" placeholder="password" />
-			<button eventListener="signup" id="signup" type="button">Signup</button>
-			<button eventListener="login" id="login" type="button">Login</button>
-			<button eventListener="logout" id="logout" type="button">Logout</button>
-			<button eventListener="log" id="log" type="button">display database</button>
+		<foreground><modal></modal></foreground>
+		<div>
+			<header class="bordered-container">
+				<div id="logo"></div>
+				<div id="profile"></div>
+
+				<input id="username" placeholder="username" />
+				<input id="password" placeholder="password" />
+				<button id="signup" type="button">Signup</button>
+				<button id="login" type="button">Login</button>
+				<button id="logout" type="button">Logout</button>
+			</header>
+
+			<main>
+				<div>
+					<search class="bordered-containere">
+						<input id="navInput" placeholder="Click to search or add" />
+						<button eventListener="addEvent" id="addEvent" type="button">add event</button>
+					</search>
+
+					<aside class="bordered-container">
+						<ul id="eventContainer" class=""></ul>
+						<div eventListener="addEventTest" id="addEventTest"></div>
+					</aside>
+				</div>
+
+				<figure class="bordered-container"></figure>
+			</main>
 		</div>
 
-		<main class="flexbox">
-			<aside>
-				<nav>
-					<input id="navInput" placeholder="Click to search or add" />
-					<button eventListener="addEvent" id="addEvent" type="button">add event</button>
-				</nav>
-
-				<ul id="dataContainer"></ul>
-			</aside>
-
-			<figure></figure>
-		</main>
 		<script type="module" src="./Scripts/main.js"></script>
 	</body>
 </html>

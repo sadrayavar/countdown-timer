@@ -1,11 +1,11 @@
 export default class BackEnd {
-	#databaseKey = "fake_back_end_database"
-	tokenLife = 1000 * 60 * 0.25
+	databaseKey = "fake_back_end_database"
+	tokenLife = 1000 * 60 * 5.25
 	#initialData = {
 		users: [
 			{
-				username: "sadra",
-				password: "123",
+				username: "1",
+				password: "1",
 				data: {
 					events: [
 						{
@@ -27,24 +27,28 @@ export default class BackEnd {
 				},
 			},
 			{
-				username: "ali",
-				password: "456",
+				username: "sadra",
+				password: "1",
 				data: {},
 			},
 		],
 	}
+
 	constructor() {
-		if (this.#read() === null) this.#write(this.#initialData)
+		const temp = this.#read()
+
+		if (temp === null) this.#write(this.#initialData)
 	}
-	tempForLog() {
-		return this.#read()
-	}
+
 	#read = () => {
-		const data = localStorage.getItem(this.#databaseKey)
+		const data = localStorage.getItem(this.databaseKey)
 		if (data === null) return null
-		else return JSON.parse(atob(data))
+		else return JSON.parse(data)
 	}
-	#write = (data) => localStorage.setItem(this.#databaseKey, btoa(JSON.stringify(data)))
+	#write(data) {
+		localStorage.setItem(this.databaseKey, JSON.stringify(data))
+	}
+
 	#response = (isOk, body = undefined, error = undefined) => {
 		if (isOk)
 			return {
@@ -75,7 +79,8 @@ export default class BackEnd {
 		return [token, refreshToken]
 	}
 	#checkUser = (username, password = undefined) => {
-		const users = this.#read().users
+		const r = this.#read()
+		const users = r.users
 
 		let existence = false
 		let userPlace = 0
@@ -92,10 +97,10 @@ export default class BackEnd {
 		}
 		return -1
 	}
-	#validateToken(token) {
+	#validateToken(token, refresh = false) {
 		const users = this.#read().users
 
-		for (let i = 0; i < users.length; i++) if (users[i].token == token) return i
+		for (let i = 0; i < users.length; i++) if (users[i].token === token) return i
 
 		return -1
 	}
@@ -139,7 +144,7 @@ export default class BackEnd {
 
 			// return response
 			return this.#response(true, { username, token, refreshToken })
-		} else return this.#response(false, "", "you cant log in - given credentials are not correct")
+		} else return this.#response(false, "", "you cant log in because given credentials are not correct")
 	}
 	refresh(refreshToken) {
 		const data = this.#read()
@@ -177,7 +182,7 @@ export default class BackEnd {
 				return this.#response(false, "", "token is dead")
 			}
 		}
-		return this.#response(false, "", "token is unvalid")
+		return this.#response(false, "", "token is invalid")
 	}
 	getData(token) {
 		const userPlace = this.#validateToken(token)
@@ -189,10 +194,41 @@ export default class BackEnd {
 	setData(token, newData) {
 		const userPlace = this.#validateToken(token)
 		if (userPlace > -1) {
-			const data = this.#read()
-			data.users[userPlace].data.events = newData
-			this.#write(data)
-			return this.#response(true, { data })
+			const temp = this.#read()
+			const eventList = temp.users[userPlace].data.events
+
+			let exist = false
+			for (let i = 0; i < eventList.length; i++) if (eventList[i].name === newData.name) exist = true
+
+			if (exist) {
+				return this.#response(false, "", "Data already exist in the backend")
+			} else {
+				eventList.push(newData)
+				this.#write(temp)
+				return this.#response(true, { newData })
+			}
 		} else return this.#response(false, "", "token is invalid")
+	}
+	removeData(token, dataId) {
+		const userPlace = this.#validateToken(token)
+		if (userPlace > -1) {
+			const temp = this.#read()
+			const eventList = temp.users[userPlace].data.events
+
+			let exist = -1
+			for (let i = 0; i < eventList.length; i++)
+				if (eventList[i].name === dataId) {
+					exist = i
+					break
+				}
+
+			if (exist === -1) {
+				return this.#response(false, "", "Data doesnt exist")
+			} else {
+				eventList.splice(exist, 1)
+				this.#write(temp)
+				return this.#response(true, { dataId })
+			}
+		} else return this.#response(false, "", "token is invalid remove Data")
 	}
 }
