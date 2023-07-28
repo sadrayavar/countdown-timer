@@ -1,0 +1,87 @@
+@import url("1-toolbox.css");
+@import url("1.1-options.css");
+@import url("1.2-eventList.css");
+@import url("2-monitor.css");
+
+:root {
+    --padding: 45px;
+
+    --searchProfileHeight: 45px;
+    --listWidth: 50%;
+    --displayWidth: 50%;
+    --borderRound: 20px;
+    --profileMainGap: -60px;
+    --listDisplayGap: -50px;
+    --listSearchGap: -25px;
+}
+
+/* .hideScrollBar::-webkit-scrollbar {
+    display: none;
+}
+
+.hideScrollBar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+} */
+
+.rowFlex {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.columnFlex {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-direction: column;
+}
+
+.primary {
+    background-color: #ffffff;
+}
+
+.secondary {
+    background-color: #696969;
+}
+
+.blue {
+    background-color: #6e1ea7;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    box-sizing: border-box;
+    font-size: large;
+    transition: 300ms all ease-out;
+}
+
+html {
+    height: 100vh;
+    width: 100vw;
+}
+
+body {
+    height: 100%;
+    width: 100%;
+
+    padding: var(--padding) 0;
+}
+
+body>main {
+    width: 85%;
+    height: 90%;
+    gap: 60px;
+
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+body>main>* {
+    width: 50%;
+    height: 100%;
+}

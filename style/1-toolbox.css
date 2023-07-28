@@ -1,0 +1,8 @@
+body>main>aside {
+    gap: 30px;
+}
+
+body>main>aside>* {
+    border-radius: 35px;
+    width: 100%;
+}
