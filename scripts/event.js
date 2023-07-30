@@ -1,15 +1,15 @@
 class Event {
-	#validTypes = ["stopwatch", "clock", "timer", "alarm", "periodical"]
-	#id = "" // name
-	#description = ""
-	#active = false
+	validTypes = ["stopwatch", "clock", "timer", "alarm", "periodical"]
+	id = "" // name
+	description = ""
+	active = false
 
 	renameEvent() {}
 }
 
 class Clock extends Event {
 	region = ""
-	
+
 	constructor(region) {
 		this.region = region
 	}

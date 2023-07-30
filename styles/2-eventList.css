@@ -1,0 +1,42 @@
+body>main>aside>div {
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+
+    padding: 20px 20px;
+}
+
+body>main>aside>div>ul {
+    height: 100%;
+    
+    align-items: flex-start;
+    flex-wrap: wrap;
+    row-gap: 60px;
+    overflow-y: scroll;
+}
+
+body>main>aside>div>ul>li {
+    list-style: none;
+    width: 40%;
+    overflow: hidden;
+}
+
+body>main>aside>div>#add {
+    color: white;
+
+    height: 60px;
+    width: 60px;
+
+    position: absolute;
+    right: 30px;
+    bottom: 30px;
+}
+
+body>main>aside>div>#add>p {
+    font-weight: 900;
+    font-size: xx-large;
+    position: absolute;
+    right: 30px;
+    bottom: 30px;
+    transform: translate(50%, 50%);
+}
