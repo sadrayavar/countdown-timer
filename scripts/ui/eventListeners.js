@@ -12,7 +12,8 @@ export default class EventListeners {
 			}
 		}
 	}
-	input(event) {
+	async input(event) {
+		event.preventDefault()
 		const target = event.target
 		const parent = target.parentNode
 
@@ -23,9 +24,29 @@ export default class EventListeners {
 		// set parent width equal as p width
 		const width = leverage.clientWidth
 		const button = target.parentNode.parentNode
-		const maxWidth = button.parentNode.clientWidth - 200
+		const maxWidth = button.parentNode.clientWidth
 
-		if (width === 0) parent.style.width = `${110}px`
-		else if (button.clientWidth < maxWidth) parent.style.width = `${width + 10}px`
+		const eventType = document.getElementById("formEventType")
+		if (width === 0) {
+			parent.style.width = `${110}px`
+
+			// remove type button
+			if (eventType !== null) {
+				eventType.style.opacity = "0"
+				setTimeout(() => eventType.remove(), 300)
+			}
+		} else if (button.clientWidth < maxWidth) {
+			parent.style.width = `${width + 10}px`
+
+			// add type button
+			const Ui = (await import("./ui.js")).default
+			const form = document.getElementsByTagName("form")[0]
+			if (eventType === null) {
+				const typeSelector = new Ui().formEventType()
+				form.append(typeSelector)
+				setTimeout(() => (typeSelector.style.opacity = "1"), 0)
+				new Ui().addEventListener({ id: "formEventType" })
+			}
+		}
 	}
 }

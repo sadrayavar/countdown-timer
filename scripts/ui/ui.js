@@ -1,37 +1,19 @@
+import EventListeners from "./eventListeners.js"
+
 /**
  * Manage ui elements like adding or removing it
  */
 export default class Ui {
-	constructor() {
-		// add form search
-		const form = document.getElementsByTagName("form")[0]
-		form.append(this.formSearch())
-
-		// add event listeners
-		this.#addEventListeners()
-		this.#setSelectOptionSize()
-	}
-
 	// ############################################### methods
+	async addEventListener(params = { id, all: false }) {
+		const { id, all } = params
+		const eventListeners = (await import("./eventListeners.js")).default
 
-	#setSelectOptionSize() {
-		for (const element of document.getElementsByClassName("hasEvent")) {
-			for (const child of element.children) {
-				if (child.tagName === "SELECT") {
-					child.style.width = `${75}px`
-					console.log()
-				}
-			}
-		}
-	}
+		const elemList =
+			all === true ? document.getElementsByClassName("hasEvent") : [document.getElementById(id).children[1]]
 
-	async #addEventListeners() {
-		const module = await import("./eventListeners.js")
-		const EventListeners = module.default
-
-		for (const element of document.getElementsByClassName("hasEvent")) {
+		for (const element of elemList) {
 			const attribute = element.getAttribute("eventListenerName")
-			if (typeof attribute !== "string") continue
 			const [eventName, methodName] = attribute.split("_")
 			element.addEventListener(eventName, new EventListeners()[methodName])
 		}
@@ -67,10 +49,14 @@ export default class Ui {
 	// ############################################### elements
 	formSearch() {
 		// p
-		const p = this.createElement({ name: "p", values: ["Search"] })
+		const search = this.createElement({ name: "p", values: ["Search"] })
 
 		// select
-		const selectDiv = this.#select([{ value: "Name", active: true }, { value: "Description" }])
+		const selectGroup = this.#select(
+			[{ value: "Name", active: true }, { value: "Description" }],
+			"Where to search from",
+			75
+		)
 
 		// input
 		const input = this.createElement({
@@ -91,10 +77,32 @@ export default class Ui {
 		// main
 		const main = this.createElement({
 			name: "div",
-			values: [p, selectDiv, inputGroup],
+			values: [search, selectGroup, inputGroup],
 			attributes: { id: "formSearch" },
 			classList: ["rowFlex", "radius", "primary", "baseline"],
 		})
+
+		return main
+	}
+	formEventType() {
+		// p
+		const p = this.createElement({ name: "p", values: ["Event Type:"] })
+
+		// select
+		const selectGroup = this.#select(
+			[{ value: "All", active: true }, { value: "Alarm" }, { value: "Clock" }],
+			"Event type to search from",
+			45
+		)
+
+		// main
+		const main = this.createElement({
+			name: "div",
+			values: [p, selectGroup],
+			attributes: { id: "formEventType" },
+			classList: ["rowFlex", "radius", "primary"],
+		})
+		main.style.opacity = "0"
 
 		return main
 	}
@@ -103,7 +111,7 @@ export default class Ui {
 	 * @param {Array} listOfOptions list of objects that represent options and they default state like [{value:'a',default:false},{value:'b',default:true},{value:'c',default:false}]
 	 * @returns HTML tag
 	 */
-	#select(listOfOptions) {
+	#select(listOfOptions, title, size) {
 		const select = this.createElement({
 			name: "select",
 			values: listOfOptions.map((options) =>
@@ -113,26 +121,21 @@ export default class Ui {
 					attributes: options.active === true ? { selected: "" } : {},
 				})
 			),
-			attributes: {
-				id: "2",
-				title: "Where to search from",
-			},
+			attributes: { title },
 		})
-		const selectP = this.createElement({ name: "p", classList: ["widthLeverage"] })
+		select.style.width = `${size}px`
 
-		const selectDiv = this.createElement({
+		const leverage = this.createElement({ name: "p", classList: ["widthLeverage"] })
+
+		const group = this.createElement({
 			name: "div",
-			values: [select, selectP],
+			values: [select, leverage],
 			classList: ["columnFlex", "hasEvent"],
 			attributes: {
 				eventListenerName: "change_select",
 			},
 		})
 
-		return selectDiv
-	}
-
-	#input(placeHolder) {
-		return inputGroup
+		return group
 	}
 }

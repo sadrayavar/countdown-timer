@@ -25,6 +25,10 @@ body>main>aside>form>#formSearch>div>input {
 }
 
 /* ############################################### type */
+body>main>aside>form>#formEventType {
+    transition: all 300ms ease-out;
+}
+
 /* ############################################### time */
 body>main>aside>form>#formTime {
     display: none;

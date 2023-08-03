@@ -7,6 +7,12 @@ export class Main {
 	db = new Database()
 
 	constructor() {
+		// add form elements
+		const form = document.getElementsByTagName("form")[0]
+		form.append(this.ui.formSearch())
+
+		// add event listeners
+		this.ui.addEventListener({ all: true })
 	}
 
 	addEvent() {}
