@@ -9,8 +9,16 @@ export default class Ui {
 		const { id, all } = params
 		const eventListeners = (await import("./eventListeners.js")).default
 
-		const elemList =
-			all === true ? document.getElementsByClassName("hasEvent") : [document.getElementById(id).children[1]]
+		let elemList
+		if (all === true) {
+			elemList = document.getElementsByClassName("hasEvent")
+		} else {
+			for (const child of document.getElementById(id).children) {
+				if (child.getAttribute("eventListenerName") !== null) {
+					elemList = [child]
+				}
+			}
+		}
 
 		for (const element of elemList) {
 			const attribute = element.getAttribute("eventListenerName")
