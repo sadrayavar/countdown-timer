@@ -15,7 +15,7 @@ export default class Ui {
 	// ############################################### methods
 
 	#setSelectOptionSize() {
-		for (const element of document.getElementsByClassName("eventListener")) {
+		for (const element of document.getElementsByClassName("hasEvent")) {
 			for (const child of element.children) {
 				if (child.tagName === "SELECT") {
 					child.style.width = `${75}px`
@@ -29,8 +29,9 @@ export default class Ui {
 		const module = await import("./eventListeners.js")
 		const EventListeners = module.default
 
-		for (const element of document.getElementsByClassName("eventListener")) {
+		for (const element of document.getElementsByClassName("hasEvent")) {
 			const attribute = element.getAttribute("eventListenerName")
+			if (typeof attribute !== "string") continue
 			const [eventName, methodName] = attribute.split("_")
 			element.addEventListener(eventName, new EventListeners()[methodName])
 		}
@@ -69,14 +70,12 @@ export default class Ui {
 		const p = this.createElement({ name: "p", values: ["Search"] })
 
 		// select
-		const selectDiv = this.select([{ value: "Name", active: true }, { value: "Description" }])
+		const selectDiv = this.#select([{ value: "Name", active: true }, { value: "Description" }])
 
 		// input
 		const input = this.createElement({
 			name: "input",
-			// classList: ["border"],
 			attributes: {
-				id: "formSearch",
 				placeholder: "Type here...",
 			},
 		})
@@ -84,20 +83,27 @@ export default class Ui {
 		const inputGroup = this.createElement({
 			name: "div",
 			values: [input, inputWidthHandle],
-			classList: ["dynamicInputWidth"],
+			classList: ["hasEvent"],
+			attributes: { eventListenerName: "input_input" },
 		})
+		inputGroup.style.width = "110px"
 
 		// main
 		const main = this.createElement({
 			name: "div",
 			values: [p, selectDiv, inputGroup],
+			attributes: { id: "formSearch" },
 			classList: ["rowFlex", "radius", "primary", "baseline"],
 		})
 
 		return main
 	}
 
-	select(listOfOptions) {
+	/**
+	 * @param {Array} listOfOptions list of objects that represent options and they default state like [{value:'a',default:false},{value:'b',default:true},{value:'c',default:false}]
+	 * @returns HTML tag
+	 */
+	#select(listOfOptions) {
 		const select = this.createElement({
 			name: "select",
 			values: listOfOptions.map((options) =>
@@ -107,7 +113,6 @@ export default class Ui {
 					attributes: options.active === true ? { selected: "" } : {},
 				})
 			),
-			classList: ["dynamicSelectWidth"],
 			attributes: {
 				id: "2",
 				title: "Where to search from",
@@ -118,12 +123,16 @@ export default class Ui {
 		const selectDiv = this.createElement({
 			name: "div",
 			values: [select, selectP],
-			classList: ["columnFlex", "eventListener"],
+			classList: ["columnFlex", "hasEvent"],
 			attributes: {
 				eventListenerName: "change_select",
 			},
 		})
 
 		return selectDiv
+	}
+
+	#input(placeHolder) {
+		return inputGroup
 	}
 }

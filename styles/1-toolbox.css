@@ -20,7 +20,8 @@ body>main>aside>form>div>* {
 /* ############################################### search */
 
 body>main>aside>form>#formSearch>div>input {
-    width: 100px;
+    margin-left: 5px;
+    width: 100%;
 }
 
 /* ############################################### type */

@@ -1,3 +1,4 @@
+@import url("0-classes.css");
 @import url("1-toolbox.css");
 @import url("2-eventList.css");
 @import url("3-monitor.css");
@@ -12,73 +13,6 @@
     --profileMainGap: -60px;
     --listDisplayGap: -50px;
     --listSearchGap: -25px;
-}
-
-/* .hideScrollBar::-webkit-scrollbar {
-    display: none;
-}
-
-.hideScrollBar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-} */
-
-.dynamicInputWidth>input {
-    padding: 0 10px;
-
-    height: 100%;
-    width: 150px;
-}
-
-.widthLeverage {
-    display: block;
-
-    visibility: hidden;
-
-    height: 0;
-    width: max-content;
-}
-
-.dynamicSelectWidth {
-    max-width: none;
-}
-
-.rowFlex {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.columnFlex {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-direction: column;
-}
-
-.primary {
-    background-color: #ffffff;
-}
-
-.secondary {
-    background-color: #696969;
-}
-
-.blue {
-    background-color: #6e1ea7;
-}
-
-.radius {
-    border-radius: 30px;
-}
-
-.baseline {
-    align-items: baseline;
-}
-
-.border {
-    border: #696969 1px solid;
-    width: 50px;
 }
 
 input:focus-visible {

@@ -1,0 +1,52 @@
+/* .hideScrollBar::-webkit-scrollbar {
+    display: none;
+}
+
+.hideScrollBar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+} */
+
+.widthLeverage {
+    visibility: hidden;
+    height: 0;
+    width: min-content;
+}
+
+.rowFlex {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.columnFlex {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-direction: column;
+}
+
+.primary {
+    background-color: #ffffff;
+}
+
+.secondary {
+    background-color: #696969;
+}
+
+.blue {
+    background-color: #6e1ea7;
+}
+
+.radius {
+    border-radius: 30px;
+}
+
+.baseline {
+    align-items: baseline;
+}
+
+.border {
+    border: #696969 1px solid;
+    width: 50px;
+}

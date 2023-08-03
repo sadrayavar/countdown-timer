@@ -1,13 +1,12 @@
-import Ui from "./ui.js"
-import Database from "./database.js"
-import { Clock, Stopwatch, Timer, Alarm, Preiodical } from "./event.js"
+import Ui from "./ui/ui.js"
+import Database from "./data/database.js"
+import { Clock, Stopwatch, Timer, Alarm, Preiodical } from "./data/event.js"
 
 export class Main {
 	ui = new Ui()
 	db = new Database()
 
 	constructor() {
-		this.dbd
 	}
 
 	addEvent() {}
@@ -17,4 +16,3 @@ export class Main {
 }
 
 const main = new Main()
-export default main
